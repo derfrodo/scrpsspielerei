@@ -11,7 +11,7 @@ module.exports = {
     devtool: "source-map",
     entry: require("./webpack.dev.entry"),
     output: {
-        filename: "main",
+        filename: "[name]",
         path: path.resolve(__dirname, "../dist"),
         sourceMapFilename: "[file].map.js", // normally this is [file].map, 
         // but we need a js file, or it will be rejected by screeps server.
@@ -20,14 +20,6 @@ module.exports = {
         libraryTarget: "commonjs2",
     },
     target: "node",
-    node: {
-        Buffer: false,
-        __dirname: false,
-        __filename: false,
-        console: true,
-        global: true,
-        process: false,
-    },
     resolve: require("./webpack.resolve"),
     module: require("./webpack.rules"),
     externals: require("./webpack.externals"),
