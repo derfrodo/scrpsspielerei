@@ -16,6 +16,7 @@ compiler.run((err, stats) => {
     }
     else{
         console.log("Deployed!")
+        console.log(stats);
     }
 
 });

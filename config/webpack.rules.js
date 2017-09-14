@@ -1,9 +1,7 @@
 const autoprefixer = require("autoprefixer");
 
 const babelOptions = {
-    "presets": [
-        ["es2015"],
-    ]
+    "presets": ["es2015"]
 }
 
 module.exports = {
@@ -16,7 +14,10 @@ module.exports = {
                     options: babelOptions,
                 },
                 {
-                    loader: "ts-loader"
+                    loader: "ts-loader",
+                    options: {
+                        configFile: "../tsconfig.json"
+                    }
                 },
                 {
                     loader: "tslint-loader",

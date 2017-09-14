@@ -3,11 +3,10 @@
     "compilerOptions": {
         "module": "es6",
         "target": "es5",
-        "baseUrl": "src",
+        
         "allowSyntheticDefaultImports": true,
         "noImplicitAny": false,
         "sourceMap": true,
-        "outDir": "ts-build",
         "jsx": "preserve"
     },
     "exclude": [
