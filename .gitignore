@@ -1,7 +1,11 @@
 node_modules/**/*
+
+dist/**/*
+
+*.secret.*
+*.secret
+
 *.log
 *.log.*
 
 
-*.secret.*
-*.secret
