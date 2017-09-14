@@ -13,6 +13,11 @@ module.exports = {
     output: {
         filename: "main",
         path: path.resolve(__dirname, "../dist"),
+        sourceMapFilename: "[file].map.js", // normally this is [file].map, 
+        // but we need a js file, or it will be rejected by screeps server.
+        //devtoolModuleFilenameTemplate: "[resource-path]",
+        //pathinfo: true,
+        libraryTarget: "commonjs2",
     },
     target: "node",
     node: {

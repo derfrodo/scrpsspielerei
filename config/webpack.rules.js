@@ -2,12 +2,7 @@ const autoprefixer = require("autoprefixer");
 
 const babelOptions = {
     "presets": [
-        ["es2015", { "modules": false }],
-        "react",
-        "stage-0"
-    ],
-    "plugins": [
-        "react-hot-loader/babel"
+        ["es2015"],
     ]
 }
 
@@ -27,7 +22,7 @@ module.exports = {
                     loader: "tslint-loader",
                     options: {
                         failOnHint: false,
-                        configuration: require("../tslint.json")
+                        tsConfigFile: "../tslint.json",
                     }
                 }
             ],
