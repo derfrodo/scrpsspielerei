@@ -5,8 +5,9 @@
     "tasks": [
         {
             "taskName": "tsc-w",
-            "type": "process",
+            "type": "shell",
             "command": "tsc",
+            "isBackground": true,
             "args": [
                 "-w",
                 "-p \"tsconfig.json\"",

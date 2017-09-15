@@ -28,7 +28,7 @@ export class HarversterRole implements IHarversterRole {
             } else {
                 const mySpawns: Spawn[] = creep.room.find(FIND_MY_SPAWNS) as Spawn[];
                 if (creep.transfer(mySpawns[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(mySpawns[0], {
+                    creep.moveTo(mySpawns[0].pos, {
                         visualizePathStyle: {
                             fill: "transparent",
                             lineStyle: "dashed",
@@ -47,6 +47,7 @@ export class HarversterRole implements IHarversterRole {
         const harvesterBaseName = `${Roles.CREEP_HARVERSTER_ROLE}_Harry_`;
         this.creepManager.createCreeps(harvestingCreeps,
             DefaultCreepSettings.harverstersTargetCount,
-            harvesterBaseName);
+            harvesterBaseName,
+            [CARRY, WORK, MOVE]);
     }
 }

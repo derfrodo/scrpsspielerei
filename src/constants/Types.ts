@@ -1,10 +1,12 @@
 // tslint:disable object-literal-sort-keys
 export const TYPES = {
+    // Managers:
     CreepManager: Symbol("CreepManager"),
-    HarvesterRole: Symbol("HarvesterRole"),
-    BuilderRole: Symbol("BuilderRole"),
+    RoomManager: Symbol("RoomManager"),
 
-    Weapon: Symbol("Weapon"),
+    // Roles:
+    HarvesterRole: Symbol("HarvesterRole"),
+    UpgraderRole: Symbol("UpgraderRole"),
 };
 
 export default TYPES;
