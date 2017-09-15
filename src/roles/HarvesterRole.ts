@@ -1,20 +1,29 @@
+import { inject, injectable } from "inversify";
+import { TYPES } from "../constants/Types";
+
 import { DefaultCreepSettings } from "./../constants/creepSettings";
 import { Roles } from "./../constants/roles";
-import { CreepManager } from "./../managers/CreepManager";
 
-export class HarversterRole {
+import { ICreepManager } from "../managers/Contract/ICreepManager";
+import { IHarversterRole } from "./Contract/IHarvesterRole";
 
-    private creepManager: CreepManager = new CreepManager();
+@injectable()
+export class HarversterRole implements IHarversterRole {
 
-    public harvestEnergy = (harvestingCreeps: Creep[]) => {
+    private creepManager: ICreepManager;
+
+    public constructor( @inject(TYPES.CreepManager) creepManager: ICreepManager) {
+        this.creepManager = creepManager;
+    }
+
+    public harvestEnergy(harvestingCreeps: Creep[]) {
         // tslint:disable-next-line:forin
         for (const creepIndex in harvestingCreeps) {
             const creep = harvestingCreeps[creepIndex];
             if (creep.carry.energy < creep.carryCapacity) {
-                const sources: Source[] = creep.pos.findClosestByPath(FIND_SOURCES) as Source[];
-                // const sources: Source[] = creep.room.find(FIND_SOURCES) as Source[];
-                if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(sources[0]);
+                const sources: Source = creep.pos.findClosestByPath(FIND_SOURCES) as Source;
+                if (creep.harvest(sources) === ERR_NOT_IN_RANGE) {
+                    creep.moveTo(sources);
                 }
             } else {
                 const mySpawns: Spawn[] = creep.room.find(FIND_MY_SPAWNS) as Spawn[];
@@ -33,7 +42,7 @@ export class HarversterRole {
         }
     }
 
-    public createHarvestersIfNeeded = (harvestingCreeps: Creep[]) => {
+    public createHarvestersIfNeeded(harvestingCreeps: Creep[]) {
 
         const harvesterBaseName = `${Roles.CREEP_HARVERSTER_ROLE}_Harry_`;
         this.creepManager.createCreeps(harvestingCreeps,

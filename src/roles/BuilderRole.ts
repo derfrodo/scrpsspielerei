@@ -1,8 +1,12 @@
+import { inject, injectable } from "inversify";
+
 import { DefaultCreepSettings } from "../constants/creepSettings";
 import { Roles } from "../constants/roles";
 import { CreepManager } from "../managers/CreepManager";
+import { IBuilderRole } from "./Contract/IBuilderRole";
 
-export class BuilderRole {
+@injectable()
+export class BuilderRole implements IBuilderRole {
 
     private creepManager: CreepManager = new CreepManager();
 
