@@ -4,10 +4,13 @@
 // so that a singleton is created.
 import "reflect-metadata";
 
-// Der container:
+// The container itself
 import { Container } from "inversify";
 
 import { TYPES } from "./constants/Types";
+
+// Dataclasses and/or Settings:
+import { CreepSettings } from "./constants/creepSettings";
 
 // Interfaces
 import { ICreepManager } from "./managers/Contract/ICreepManager";
@@ -24,9 +27,14 @@ import { UpgraderRole } from "./roles/UpgraderRole";
 // Service Container
 export const DependencyService = new Container();
 
+// Settings
+DependencyService.bind<CreepSettings>(TYPES.CreepSettings).toConstantValue(new CreepSettings());
+
+// Manager
 DependencyService.bind<ICreepManager>(TYPES.CreepManager).to(CreepManager).inSingletonScope();
 DependencyService.bind<IRoomManager>(TYPES.RoomManager).to(RoomManager);
 
+// Roles
 DependencyService.bind<IHarversterRole>(TYPES.HarvesterRole).to(HarversterRole);
 DependencyService.bind<IUpgraderRole>(TYPES.UpgraderRole).to(UpgraderRole);
 

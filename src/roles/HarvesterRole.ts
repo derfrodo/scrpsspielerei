@@ -42,12 +42,4 @@ export class HarversterRole implements IHarversterRole {
         }
     }
 
-    public createHarvestersIfNeeded(harvestingCreeps: Creep[]) {
-
-        const harvesterBaseName = `${Roles.CREEP_HARVERSTER_ROLE}_Harry_`;
-        this.creepManager.createCreeps(harvestingCreeps,
-            DefaultCreepSettings.harverstersTargetCount,
-            harvesterBaseName,
-            [CARRY, WORK, MOVE]);
-    }
 }

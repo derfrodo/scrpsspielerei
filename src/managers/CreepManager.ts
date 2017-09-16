@@ -1,44 +1,24 @@
 import { inject, injectable } from "inversify";
+import { Roles } from "../constants/roles";
+
 import { ICreepManager } from "./Contract/ICreepManager";
 import { MyCreeps } from "./Contract/MyCreeps";
 
 @injectable()
 export class CreepManager implements ICreepManager {
 
-    public createCreeps(existingCreeps: Creep[], maximumCreeps: number, creepBaseName: string, creepParts: string[]) {
-
-        if (existingCreeps.length < maximumCreeps) {
-            let i = 0;
-
-            let nextCreepName = creepBaseName + i;
-            while (Game.creeps[creepBaseName + i]) {
-                i++;
-                nextCreepName = creepBaseName + i;
-            }
-
-            // tslint:disable-next-line:forin
-            for (const spawnName in Game.spawns) {
-
-                const spawn = Game.spawns[spawnName];
-
-                if (spawn.canCreateCreep(creepParts, nextCreepName) === 0) {
-
-                    const createResult = spawn.createCreep(creepParts, nextCreepName);
-                    if (createResult === 0) {
-                        // creep created
-                        // tslint:disable-next-line:no-console
-                        console.log("Creating creep in spawn: " + spawnName);
-                    } else {
-                        // tslint:disable-next-line:no-console
-                        console.log("Failed to create creep: " + createResult);
-                    }
-                } else {
-                    // tslint:disable-next-line:no-console
-                    console.log("Can not create " + nextCreepName + " in spawn: " + spawnName);
-                }
-            }
-
+    public getHarvesters(creeps: Creep[]): Creep[] {
+        if (creeps) {
+            return _.filter(creeps, (creep) => (creep.memory as CreepMemory).role === Roles.CREEP_HARVERSTER_ROLE);
         }
+        return [];
+    }
+
+    public getUpgrader(creeps: Creep[]): Creep[] {
+        if (creeps) {
+            return _.filter(creeps, (creep) => (creep.memory as CreepMemory).role === Roles.CREEP_UPGRADER_ROLE);
+        }
+        return [];
     }
 
     public resolveMyCreeps(): MyCreeps {
@@ -68,5 +48,42 @@ export class CreepManager implements ICreepManager {
         }
 
         return creeps;
+    }
+
+    public getCreepsForRoom(room: Room): Creep[] {
+        return _.filter(Game.creeps,
+            (creep) =>
+                creep.room === room);
+    }
+
+    public createCreep(
+        creepName: string,
+        creepParts: string[],
+        memory: Pick<CreepMemory, keyof CreepMemory>,
+        spawn: StructureSpawn): number {
+
+        const canCreateCreep = spawn.canCreateCreep(creepParts, creepName);
+        if (canCreateCreep === 0) {
+            // creep can be created: Let's do it!
+            const createResult = spawn.createCreep(creepParts, creepName, memory);
+            return (typeof (createResult) === "string") ? 0 : createResult;
+        }
+        return canCreateCreep;
+    }
+
+    public canCreateCreepWithName(creepName: string): boolean {
+        // name must be unique
+        return _.find(Game.creeps, (creep) => creep.name === creepName) ? false : true;
+    }
+
+    public canCreateCreepAtSpawn(spawn: StructureSpawn, creepParts: string[]): boolean {
+        return spawn.canCreateCreep(creepParts) === 0;
+    }
+
+    public getCosts(creepParts: string[]): number {
+        return creepParts.reduce(
+            (previousResult, currentValue, currentIndex, partsArray) =>
+                previousResult += BODYPART_COST[currentValue],
+            0);
     }
 }

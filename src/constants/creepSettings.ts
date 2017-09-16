@@ -1,7 +1,14 @@
 export class CreepSettings {
-    public harverstersTargetCount = 5;
 
-    public buildersTargetCount = 2;
+    /**
+     * How many harvesters shall be created inside a single room?
+     */
+    public harvestersPerRoom = 5;
+
+    /**
+     * How many upgraders shall be created inside a single room?
+     */
+    public upgradersPerRoom = 2;
 }
 
 export const DefaultCreepSettings = new CreepSettings();

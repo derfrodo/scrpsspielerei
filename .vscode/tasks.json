@@ -10,7 +10,8 @@
             "isBackground": true,
             "args": [
                 "-w",
-                "-p \"tsconfig.json\"",
+                "-p",
+                "tsconfig.json",
                 "--noEmit"
             ],
             "problemMatcher": [

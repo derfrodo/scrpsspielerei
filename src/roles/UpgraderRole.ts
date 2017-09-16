@@ -16,15 +16,6 @@ export class UpgraderRole implements IUpgraderRole {
         this.creepManager = creepManager;
     }
 
-    public createUpgradersIfNeeded = (upgraderCreeps: Creep[]) => {
-
-        const buildersBaseName = `${Roles.CREEP_UPGRADER_ROLE}_Udo_`;
-        this.creepManager.createCreeps(upgraderCreeps,
-            DefaultCreepSettings.buildersTargetCount,
-            buildersBaseName,
-            [CARRY, WORK, MOVE]);
-    }
-
     public upgradeController(upgraderCreeps: Creep[]) {
         // tslint:disable-next-line:forin
         for (const creepIndex in upgraderCreeps) {

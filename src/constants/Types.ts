@@ -7,6 +7,9 @@ export const TYPES = {
     // Roles:
     HarvesterRole: Symbol("HarvesterRole"),
     UpgraderRole: Symbol("UpgraderRole"),
+
+    // Settings:
+    CreepSettings: Symbol("CreepSettings"),
 };
 
 export default TYPES;
