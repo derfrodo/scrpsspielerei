@@ -10,11 +10,7 @@ export class CreepSettings {
      */
     public upgradersPerRoom = 2;
 
-    public builderCreeps = {
-        buildersPerRoom: 2,
-        roadBuildersPerRoom: 1,
-    };
-
+    public buildersPerRoom = 2;
 }
 
 export const DefaultCreepSettings = new CreepSettings();

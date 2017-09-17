@@ -2,6 +2,7 @@
 export const TYPES = {
     // Controllers:
     RoomController: Symbol("RoomController"),
+    RoadController: Symbol("RoadController"),
 
     // Managers:
     CreepManager: Symbol("CreepManager"),
@@ -18,6 +19,7 @@ export const TYPES = {
 
     // Settings:
     CreepSettings: Symbol("CreepSettings"),
+    RoomSettings: Symbol("RoomSettings"),
 };
 
 export default TYPES;

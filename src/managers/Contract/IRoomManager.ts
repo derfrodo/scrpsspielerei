@@ -1,3 +1,5 @@
+import { RoomMemory } from "../../memory/RoomMemory";
+
 export interface IRoomManager {
 
     /**
@@ -33,4 +35,9 @@ export interface IRoomManager {
      * Sets construction sites according to the level of the room's controller
      */
     updateRoomExtensions(room: Room);
+
+    /**
+     * Returns the memory of the room
+     */
+    getRoomMemory(room: Room): RoomMemory;
 }

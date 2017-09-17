@@ -110,7 +110,7 @@ export class RoomController implements IRoomController {
 
                 // maybe we should check if all spawns are busy now with creating harvesters?
                 // otherwise a spawn may be available but not used during at least one tick
-            } else if (builders.length < this.creepSettings.builderCreeps.buildersPerRoom) {
+            } else if (builders.length < this.creepSettings.buildersPerRoom) {
                 this.roomManager.createBuilderInRoom(energyLevel, room);
             } else if (upgraders.length < this.creepSettings.upgradersPerRoom) {
                 // after harvesters we want to build some upgraders...
@@ -160,8 +160,7 @@ export class RoomController implements IRoomController {
          */
         this.upgraderRole.upgradeController(upgraders);
 
-        this.builderRole.updateBuilderTypes(room, builders);
-
+        this.builderRole.updateBuildingTasks(builders);
         this.builderRole.performBuildingTasks(builders);
     }
 

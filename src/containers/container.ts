@@ -7,10 +7,10 @@ import "reflect-metadata";
 // The container itself
 import { Container } from "inversify";
 
-import { BuilderRolesContainer } from "./builderRolesContainer";
 import { GeneralContainer } from "./generalContainer";
+import { RoleContainer } from "./roleContainer";
 
 // Service Container
-export const DependencyService = Container.merge(GeneralContainer, BuilderRolesContainer);
+export const DependencyService = Container.merge(GeneralContainer, RoleContainer);
 
 export default DependencyService;

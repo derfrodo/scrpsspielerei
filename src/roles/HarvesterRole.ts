@@ -87,6 +87,14 @@ export class HarversterRole implements IHarvesterRole {
     }
 
     private buildStuff(creep: Creep) {
+        const ecs = this.roomManager.getExtensionConstructionSiteOfRoom(creep.room);
+        if (ecs) {
+            if (creep.build(ecs) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(ecs.pos, HarvesterCreepMoveOptions);
+            }
+            return;
+        }
+
         const cs = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES) as ConstructionSite;
         if (cs) {
             if (creep.build(cs) === ERR_NOT_IN_RANGE) {

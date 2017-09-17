@@ -10,6 +10,8 @@ import { IUpgraderRole } from "../roles/Contract/IUpgraderRole";
 import { ICreepManager } from "./Contract/ICreepManager";
 import { IRoomManager } from "./Contract/IRoomManager";
 
+import { RoomMemory } from "../memory/RoomMemory";
+
 // tslint:disable:no-console
 // tslint:disable:forin
 
@@ -22,6 +24,10 @@ export class RoomManager implements IRoomManager {
     constructor(
         @inject(TYPES.CreepManager) creepManager: ICreepManager) {
         this.creepManager = creepManager;
+    }
+
+    public getRoomMemory(room: Room): RoomMemory {
+        return room.memory as RoomMemory;
     }
 
     public getRoomEnergyLevel(room: Room): number {
