@@ -72,9 +72,12 @@ export class BuilderRole implements IBuilderRole {
                     break;
                 }
 
-                const cs: ConstructionSite = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES) as ConstructionSite;
-                if (creep.build(cs) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(cs.pos, RoadBuilderMoveToOps);
+                const cs: ConstructionSite =
+                    creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES) as ConstructionSite;
+                if (cs) {
+                    if (creep.build(cs) === ERR_NOT_IN_RANGE) {
+                        creep.moveTo(cs.pos, RoadBuilderMoveToOps);
+                    }
                 } else {
                     const closestSpawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS) as Spawn;
                     creep.moveTo(closestSpawn.pos, RoadBuilderMoveToOps);

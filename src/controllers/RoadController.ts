@@ -1,3 +1,4 @@
+// tslint:disable:no-console
 // tslint:disable:forin
 
 import { inject, injectable } from "inversify";
@@ -6,7 +7,7 @@ import { TYPES } from "../constants/Types";
 import { RoomSettings } from "../constants/roomSettings";
 
 import { IRoomManager } from "../managers/Contract/IRoomManager";
-import { Road, RoadsToStructure } from "../memory/RoomMemory";
+import { Road } from "../memory/RoomMemory";
 
 import { PositionInRoom } from "../memory/DataStructures/PositionInRoom";
 
@@ -33,74 +34,105 @@ export class RoadController implements IRoadController {
 
         for (const roomName in rooms) {
             const room = rooms[roomName];
-            this.updateRoadsForRoom(room);
+            this.planRoadsForRoom(room);
         }
     }
 
-    public updateRoadsForRoom(room: Room) {
+    private planRoadsForRoom(room: Room) {
+        // we want some roads between our structures.
         const rm = this.roomManager.getRoomMemory(room);
+        if (!rm.roads) {
+            rm.roads = { activeRoad: null, roadsInfos: {} };
+        }
 
-        const structureRoads = rm.structureRoads || {};
-        rm.structureRoads = structureRoads;
+        const roads = rm.roads;
 
-        for (const sr in structureRoads) {
-            const rsts: RoadsToStructure = structureRoads[sr];
-            for (const id in rsts) {
-                const roads = rsts[id];
-                const unfinishedRoads = _.filter(roads, (road) => !road.finished);
+        // check if active road is still active:
+        if (roads.activeRoad) {
+            const r = roads.activeRoad;
 
-                for (const urIndex in unfinishedRoads) {
-                    const uf = unfinishedRoads[urIndex];
+            _.remove(r.unfinishedPositions, (pos) => {
+                const lats = room.lookAt(pos.x, pos.y);
+                const cs = _.find(lats, (lat) => lat.type === LOOK_CONSTRUCTION_SITES);
+                return !cs;
+            });
 
-                    _.remove(uf.unfinishedPositions, (pos) => {
-                        const lats = room.lookAt(pos.x, pos.y);
-                        const cs = _.find(lats, (lat) => lat.type === LOOK_CONSTRUCTION_SITES);
-                        return !cs;
-                    });
+            if (r.unfinishedPositions.length === 0) {
+                r.finished = true;
+            }
+        }
 
-                    if (uf.unfinishedPositions.length === 0) {
-                        uf.finished = true;
+        if (!roads.activeRoad || roads.activeRoad.finished) {
+            // Plan the next road!
+            // Well we need to select a star point, don't we?
+            console.log("We need a new road in room " + room.name);
+
+            let selectedRoad: {
+                start?: { pos: RoomPosition; id: string; },
+                destination?: { pos: RoomPosition; id: string; },
+                count?: number,
+            };
+
+            // Sources to ...
+            const sources = room.find(FIND_SOURCES) as Source[];
+            for (const i in sources) {
+                const source = sources[i];
+                if (!roads.roadsInfos[source.id]) {
+                    roads.roadsInfos[source.id] = {};
+                }
+
+                const infos = roads.roadsInfos[source.id];
+
+                // Spawns
+                const spawns = room.find(FIND_MY_SPAWNS) as Spawn[];
+                for (const j in spawns) {
+                    const spawn = spawns[j];
+                    const info = infos[spawn.id];
+                    if (!selectedRoad || selectedRoad.count > (info || 0)) {
+                        selectedRoad = {
+                            count: info || 0,
+                            destination: spawn,
+                            start: source,
+                        };
+                    }
+                }
+
+                // Extensions
+                const extensions = room.find(FIND_STRUCTURES,
+                    {
+                        filter: (struct) =>
+                            (struct as Structure).structureType === STRUCTURE_EXTENSION,
+                    }) as StructureExtension[];
+
+                for (const j in extensions) {
+                    const extension = extensions[j];
+                    const info = infos[extension.id];
+                    if (!selectedRoad || selectedRoad.count > (info || 0)) {
+                        selectedRoad = {
+                            count: info || 0,
+                            destination: extension,
+                            start: source,
+                        };
+                    }
+                }
+
+                // Controller
+                {
+                    const info = infos[room.controller.id];
+                    if (!selectedRoad || selectedRoad.count > (info || 0)) {
+                        selectedRoad = {
+                            count: info || 0,
+                            destination: room.controller,
+                            start: source,
+                        };
                     }
                 }
             }
-        }
 
-        const srcs = room.find(FIND_SOURCES) as Source[];
-
-        for (const srcName in srcs) {
-            const source = srcs[srcName];
-            const roadsToSource = rm.structureRoads[source.id] || {};
-            rm.structureRoads[source.id] = roadsToSource;
-
-            // Spawns ...
-            const spawns = this.roomManager.getSpawnsInRoom(room);
-            for (const spawn of spawns) {
-                this.addRoadIfNeeded(room, source.pos, spawn.id, roadsToSource);
-            }
-
-            // Controller
-            const ctrlr = room.controller;
-            this.addRoadIfNeeded(room, source.pos, ctrlr.id, roadsToSource);
-
-            // Extensions
-            const extensions = this.roomManager.getExtensionsInRoom(room);
-            for (const extension of extensions) {
-                this.addRoadIfNeeded(room, source.pos, extension.id, roadsToSource);
-            }
-        }
-    }
-
-    private addRoadIfNeeded(room: Room, pos1, structureId: string, roadsToSource: RoadsToStructure) {
-        const roadsFromStruct = roadsToSource[structureId] || [];
-        roadsToSource[structureId] = roadsFromStruct;
-        const unfinishedRoad = _.find(roadsFromStruct, (road) => !road.finished);
-        if (!unfinishedRoad && roadsToSource[structureId].length < this.roomSettings.maximumRoadsBetweenStructure) {
-            // we need a new road.
-            const structure = Game.structures[structureId];
-            const road = this.buildRoad(room, pos1, structure.pos);
-            if (road.unfinishedPositions.length > 0) {
-                roadsToSource[structureId].push(road);
-            }
+            console.log("Creating construction sites for new road in room " + room.name);
+            const nextRoad = this.buildRoad(room, selectedRoad.start.pos, selectedRoad.destination.pos);
+            roads.activeRoad = nextRoad;
+            roads.roadsInfos[selectedRoad.start.id][selectedRoad.destination.id] = selectedRoad.count + 1;
         }
     }
 

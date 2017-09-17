@@ -3,8 +3,19 @@ import { PositionInRoom } from "./DataStructures/PositionInRoom";
 // tslint:disable:interface-name
 
 export interface RoomMemory {
-    structureRoads: StructureRoads;
+    roads: RoomRoadsMemory;
 }
+
+export interface RoomRoadsMemory {
+    activeRoad: Road;
+
+    roadsInfos: { [startId: string]: RoadsCount };
+}
+
+/**
+ * Target of a road with numbers how many roads are leading towards the target
+ */
+export interface RoadsCount { [targetId: string]: number; }
 
 export interface Road {
     /**
@@ -18,18 +29,4 @@ export interface Road {
      * Positions which contains construction sites for the road.
      */
     unfinishedPositions: PositionInRoom[];
-}
-
-/**
- * Roads to a specific structure by "connected" structures
- */
-export interface RoadsToStructure {
-    [structureId: string]: Road[];
-}
-
-/**
- * All roads connected to the structure by structureIds
- */
-export interface StructureRoads {
-    [structureId: string]: RoadsToStructure;
 }
