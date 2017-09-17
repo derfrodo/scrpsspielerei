@@ -24,7 +24,7 @@ export class UpgraderRole implements IUpgraderRole {
                 if (creep.carry.energy < creep.carryCapacity) {
                     const sources: Source = creep.pos.findClosestByPath(FIND_SOURCES) as Source;
                     if (creep.harvest(sources) === ERR_NOT_IN_RANGE) {
-                        creep.moveTo(sources);
+                        creep.moveTo(sources, UpgraderMoveToOptions);
                     }
                 } else {
                     creep.memory.upgrading = true;
@@ -34,16 +34,7 @@ export class UpgraderRole implements IUpgraderRole {
                     creep.memory.upgrading = false;
                 } else {
                     if (creep.upgradeController(creep.room.controller) === ERR_NOT_IN_RANGE) {
-                        creep.moveTo(creep.room.controller.pos,
-                            {
-                                visualizePathStyle: {
-                                    fill: "transparent",
-                                    lineStyle: "dashed",
-                                    opacity: .1,
-                                    stroke: "#fff",
-                                    strokeWidth: .15,
-                                },
-                            });
+                        creep.moveTo(creep.room.controller.pos, UpgraderMoveToOptions);
                     }
                 }
             }
@@ -54,3 +45,13 @@ export class UpgraderRole implements IUpgraderRole {
         // const c: Creep;
     }
 }
+
+const UpgraderMoveToOptions: MoveToOpts = {
+    visualizePathStyle: {
+        fill: "transparent",
+        lineStyle: "dashed",
+        opacity: .1,
+        stroke: "#ffff00",
+        strokeWidth: .12,
+    },
+};

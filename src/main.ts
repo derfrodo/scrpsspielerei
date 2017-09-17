@@ -12,9 +12,8 @@ export const loop = () => {
     // here we are... Now it is up to us to do something cool with screeps.
 
     const roomController = DependencyService.get<IRoomController>(TYPES.RoomController);
+
     roomController.createCreepsForMyRooms();
-
     roomController.checkTechLevelOfMyRooms();
-
     roomController.doEconomicStuffInMyRooms();
 };

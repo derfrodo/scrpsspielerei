@@ -6,6 +6,7 @@ import { TYPES } from "../constants/Types";
 import { CreepSettings } from "../constants/creepSettings";
 import { ICreepManager } from "../managers/Contract/ICreepManager";
 import { IRoomManager } from "../managers/Contract/IRoomManager";
+import { CreepMemory } from "../memory/CreepMemory";
 import { IBuilderRole } from "../roles/Contract/IBuilderRole";
 import { IHarvesterRole } from "../roles/Contract/IHarvesterRole";
 import { IUpgraderRole } from "../roles/Contract/IUpgraderRole";
@@ -109,7 +110,7 @@ export class RoomController implements IRoomController {
 
                 // maybe we should check if all spawns are busy now with creating harvesters?
                 // otherwise a spawn may be available but not used during at least one tick
-            } else if (builders.length < this.creepSettings.buildersPerRoom) {
+            } else if (builders.length < this.creepSettings.builderCreeps.buildersPerRoom) {
                 this.roomManager.createBuilderInRoom(energyLevel, room);
             } else if (upgraders.length < this.creepSettings.upgradersPerRoom) {
                 // after harvesters we want to build some upgraders...
@@ -117,6 +118,23 @@ export class RoomController implements IRoomController {
 
                 // maybe we should check if all spawns are busy now with creating upgraders?
                 // otherwise a spawn may be available but not used during at least one tick
+            } else {
+                // all needed creeps have been created. Maybe we want to replace a creep?
+                if (energyLevel > 0) {
+                    let lowLevelCreep =
+                        _.find(harvesters, (creep) =>
+                            (creep.memory as CreepMemory).techLevel < energyLevel);
+                    if (!lowLevelCreep) {
+                        lowLevelCreep =
+                            _.find(creeps, (creep) =>
+                                (creep.memory as CreepMemory).techLevel < energyLevel);
+                    }
+
+                    if (lowLevelCreep) {
+                        lowLevelCreep.say("Let me go...");
+                        lowLevelCreep.suicide();
+                    }
+                }
             }
 
         } else {

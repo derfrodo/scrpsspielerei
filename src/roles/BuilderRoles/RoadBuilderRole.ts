@@ -79,6 +79,10 @@ export class RoadBuilderRole implements IRoadBuilderRole {
             } else if (rbm.currentRoadBuilderTask === "Building") {
                 this.buildRoad(creep);
             }
+            if (creep.carry.energy === 0 && creep.ticksToLive < 200) {
+                creep.say("I have to go now.");
+                creep.suicide();
+            }
         }
     }
 
@@ -137,7 +141,9 @@ export class RoadBuilderRole implements IRoadBuilderRole {
                 // let's place a construction site here!
                 if (creep.room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === 0) {
                     rbm.lastConstructionSitePosition = { x: step.x, y: step.y };
-                    creep.moveTo(step.x, step.y);
+                    if (creep.pos.getRangeTo(step.x, step.y) > 3) {
+                        creep.moveTo(step.x, step.y);
+                    }
                     return;
                 }
             }
@@ -191,6 +197,6 @@ const RoadBuilderMoveToOps: MoveToOpts = {
         lineStyle: "dashed",
         opacity: .1,
         stroke: "#f0f",
-        strokeWidth: .15,
+        strokeWidth: .12,
     },
 };

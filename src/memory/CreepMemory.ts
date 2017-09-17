@@ -15,6 +15,12 @@ export interface CreepMemory {
     techLevel: number;
 }
 
+export interface HarvesterCreepMemory extends CreepMemory {
+        status: HarvesterStatus;
+}
+
+type HarvesterStatus = "BringBack" | "Harvesting" | "Building" | undefined;
+
 export interface BuilderCreepMemory extends CreepMemory {
     initializing: boolean;
 

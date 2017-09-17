@@ -3,6 +3,7 @@
 import { inject, injectable } from "inversify";
 import { TYPES } from "../constants/Types";
 
+import { CreepSettings } from "../constants/creepSettings";
 import { ICreepManager } from "../managers/Contract/ICreepManager";
 import { IRoomManager } from "../managers/Contract/IRoomManager";
 import { BuilderCreepMemory, RoadBuilderCreepMemory } from "../memory/CreepMemory";
@@ -12,17 +13,24 @@ import { IBuilderRole } from "./Contract/IBuilderRole";
 @injectable()
 export class BuilderRole implements IBuilderRole {
 
+    // Settings
+    private creepSettings: CreepSettings;
+
     private creepManager: ICreepManager;
     private roomManager: IRoomManager;
 
     private roadBuilderRole: IRoadBuilderRole;
 
     constructor(
+        @inject(TYPES.CreepSettings) creepSettings: CreepSettings,
+
         @inject(TYPES.CreepManager) creepManager: ICreepManager,
         @inject(TYPES.RoomManager) roomManager: IRoomManager,
 
         @inject(TYPES.BuilderRoles.RoadBuilderRole) roadBuilderRole: IRoadBuilderRole,
     ) {
+        this.creepSettings = creepSettings;
+
         this.creepManager = creepManager;
         this.roomManager = roomManager;
 
@@ -40,7 +48,7 @@ export class BuilderRole implements IBuilderRole {
         const roadBuilders = _.remove(roomCreeps,
             (creep) => (creep.memory as BuilderCreepMemory).buildingType === "RoadBuilder");
 
-        if (roadBuilders.length <= 3) {
+        if (roadBuilders.length <= this.creepSettings.builderCreeps.roadBuildersPerRoom) {
             // we want roads, so lets claim some builders without type as road builders
             if (buildersWithoutType.length > 0) {
                 const builder = buildersWithoutType.pop();

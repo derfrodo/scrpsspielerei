@@ -26,17 +26,22 @@ export class RoomManager implements IRoomManager {
 
     public getRoomEnergyLevel(room: Room): number {
 
-        if (room.energyCapacityAvailable < 550) {
+        if (room.energyCapacityAvailable < 400) {
             return 0;
+        }
+
+        if (room.energyCapacityAvailable >= 400 &&
+            room.energyCapacityAvailable < 550) {
+            return 1;
         }
 
         if (room.energyCapacityAvailable >= 550 &&
             room.energyCapacityAvailable < 800) {
-            return 1;
+            return 2;
         }
 
-        if (room.energyCapacityAvailable > 800) {
-            return 2;
+        if (room.energyCapacityAvailable >= 800) {
+            return 3;
         }
         // no energy? Is it even my room?
         return -1;
@@ -291,8 +296,9 @@ interface CreepPartsMap {
  */
 const HarvesterParts: CreepPartsMap = {
     0: [WORK, CARRY, CARRY, MOVE, MOVE],
-    1: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
-    2: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    1: [WORK, WORK, CARRY, CARRY, MOVE, MOVE],
+    2: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    3: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
 };
 
 /**
@@ -300,8 +306,9 @@ const HarvesterParts: CreepPartsMap = {
  */
 const UpdaterParts: CreepPartsMap = {
     0: [WORK, CARRY, CARRY, MOVE, MOVE],
-    1: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
-    2: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    1: [WORK, WORK, CARRY, CARRY, MOVE, MOVE],
+    2: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    3: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
 };
 
 /**
@@ -309,8 +316,9 @@ const UpdaterParts: CreepPartsMap = {
  */
 const BuilderParts: CreepPartsMap = {
     0: [WORK, CARRY, CARRY, MOVE, MOVE],
-    1: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
-    2: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    1: [WORK, WORK, CARRY, CARRY, MOVE, MOVE],
+    2: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    3: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
 };
 
 export default RoomManager;
