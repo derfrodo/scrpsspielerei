@@ -3,112 +3,73 @@ import { Roles } from "../constants/roles";
 import { TYPES } from "../constants/Types";
 
 import { CreepSettings } from "../constants/creepSettings";
+import { CreepMemory } from "../memory/CreepMemory";
+import { IBuilderRole } from "../roles/Contract/IBuilderRole";
+import { IHarvesterRole } from "../roles/Contract/IHarvesterRole";
+import { IUpgraderRole } from "../roles/Contract/IUpgraderRole";
 import { ICreepManager } from "./Contract/ICreepManager";
 import { IRoomManager } from "./Contract/IRoomManager";
 
 // tslint:disable:no-console
+// tslint:disable:forin
 
 @injectable()
 export class RoomManager implements IRoomManager {
 
+    // Managers
     private creepManager: ICreepManager;
-    private creepSettings: CreepSettings;
 
     constructor(
-        @inject(TYPES.CreepManager) creepManager: ICreepManager,
-        @inject(TYPES.CreepSettings) creepSettings: CreepSettings) {
+        @inject(TYPES.CreepManager) creepManager: ICreepManager) {
         this.creepManager = creepManager;
-        this.creepSettings = creepSettings;
-    }
-
-    public createCreepsForMyRooms(): void {
-        const rooms = Game.rooms;
-
-        // tslint:disable-next-line:forin
-        for (const roomIndex in rooms) {
-            const room = rooms[roomIndex];
-            this.createCreepsForRoom(room);
-        }
-    }
-
-    public createCreepsForRoom(room: Room): void {
-        // We need creeps according to room (?) tech / energy level
-        const energyLevel = this.getRoomEnergyLevel(room);
-
-        if (energyLevel >= 0) {
-            // harvesters first!
-            const creeps = this.creepManager.getCreepsForRoom(room);
-
-            const harvesters = this.creepManager.getHarvesters(creeps);
-            const upgrader = this.creepManager.getUpgrader(creeps);
-
-            if (harvesters.length < this.creepSettings.harvestersPerRoom) {
-                // we need to create all our harvesters first and some are missing!
-                console.log("We need some harvesters in room " + room.name);
-                this.createHarvesterInRoom(energyLevel, room);
-
-                // maybe we should check if all spawns are busy now with creating harvesters?
-                // otherwise a spawn may be available but not used during at least one tick
-            } else if (upgrader.length < this.creepSettings.upgradersPerRoom) {
-                // after harvesters we want to build some upgraders...
-                console.log("We need some upgraders in room " + room.name);
-                this.createUpgraderInRoom(energyLevel, room);
-
-                // maybe we should check if all spawns are busy now with creating harvesters?
-                // otherwise a spawn may be available but not used during at least one tick
-            }
-
-        } else {
-            // tslint:disable-next-line:no-console
-            console.log("Energy level is less than 0");
-        }
-    }
-
-    public createConstructionSite(room: Room) {
-        const spawns = this.getSpawnsInRoom(room);
-        // room.createConstructionSite(room);
-
-        const extensions = this.getExtensionsInRoom(room);
     }
 
     public getRoomEnergyLevel(room: Room): number {
 
-        if (room.energyCapacityAvailable === 300) {
+        if (room.energyCapacityAvailable < 550) {
             return 0;
         }
 
-        if (room.energyCapacityAvailable <= 550) {
+        if (room.energyCapacityAvailable >= 550 &&
+            room.energyCapacityAvailable < 800) {
             return 1;
         }
 
-        if (room.energyCapacityAvailable > 550) {
+        if (room.energyCapacityAvailable > 800) {
             return 2;
         }
-
         // no energy? Is it even my room?
         return -1;
     }
-    private getSpawnsInRoom(room: Room): StructureSpawn[] {
+
+    public getSpawnsInRoom(room: Room): StructureSpawn[] {
         const spawnsInRoom: StructureSpawn[] = _.filter(Game.spawns, (spawn) => spawn.room === room);
         return spawnsInRoom;
     }
 
-    private getAvailableSpawnsInRoom(room: Room, creepParts: string[]): StructureSpawn[] {
-        const costs = this.creepManager.getCosts(creepParts);
+    public getAvailableSpawnsInRoom(room: Room, creepParts: string[]): StructureSpawn[] {
+        const costs = this.creepManager.getCreepCosts(creepParts);
+
+        const energyInExtensions = this.getExtensionsInRoom(room).reduce((pv, cv, ci, array) => pv += cv.energy, 0);
+
         const availableSpawns: StructureSpawn[] =
             _.filter(Game.spawns, (spawn) =>
                 spawn.room === room &&
-                spawn.energy >= costs &&
+                spawn.energy >= (costs - energyInExtensions) &&
                 spawn.spawning === null);
         return availableSpawns;
     }
 
-    private getStructuresInRoom(room: Room): Structure[] {
-        const structures: Structure[] = _.filter(Game.structures, (struct) => struct.room === room);
+    public getStructuresInRoom(room: Room, additionalFilter?: (structure: Structure) => boolean): Structure[] {
+        const structures =
+            _.filter(Game.structures,
+                (structure) =>
+                    structure.room === room &&
+                    (additionalFilter ? additionalFilter(structure) : true));
         return structures;
     }
 
-    private getExtensionsInRoom(room: Room): StructureExtension[] {
+    public getExtensionsInRoom(room: Room): StructureExtension[] {
         const structures: StructureExtension[] =
             _.filter(Game.structures,
                 (struct) =>
@@ -117,14 +78,14 @@ export class RoomManager implements IRoomManager {
         return structures;
     }
 
-    private createHarvesterInRoom(energyLevel: number, room: Room) {
+    public createHarvesterInRoom(energyLevel: number, room: Room) {
         const creepParts = HarvesterParts[energyLevel];
         const availableSpawns = this.getAvailableSpawnsInRoom(room, creepParts);
 
         if (availableSpawns.length > 0) {
-
-            const harvesterBaseName = `${Roles.CREEP_HARVERSTER_ROLE}_${room.name}_Harry_`;
-            const creepName = this.createNextCreepName(harvesterBaseName);
+            console.log("We need some harvesters in room " + room.name);
+            const harvesterBaseName = `${Roles.CREEP_HARVERSTER_ROLE}_Harry_${room.name}_`;
+            const creepName = this.creepManager.getNextCreepName(harvesterBaseName);
             console.log("Creating harverster in room with name: " + creepName);
             this.createCreep(
                 creepName,
@@ -134,14 +95,14 @@ export class RoomManager implements IRoomManager {
         }
     }
 
-    private createUpgraderInRoom(energyLevel: number, room: Room) {
+    public createUpgraderInRoom(energyLevel: number, room: Room) {
         const creepParts = UpdaterParts[energyLevel];
 
         const availableSpawns = this.getAvailableSpawnsInRoom(room, creepParts);
         if (availableSpawns.length > 0) {
-
-            const upgraderBaseName = `${Roles.CREEP_UPGRADER_ROLE}_${room.name}_Uwe_`;
-            const creepName = this.createNextCreepName(upgraderBaseName);
+            console.log("We need some upgraders in room " + room.name);
+            const upgraderBaseName = `${Roles.CREEP_UPGRADER_ROLE}_Uwe_${room.name}_`;
+            const creepName = this.creepManager.getNextCreepName(upgraderBaseName);
             this.createCreep(
                 creepName,
                 creepParts,
@@ -150,14 +111,68 @@ export class RoomManager implements IRoomManager {
         }
     }
 
-    private createNextCreepName(creepBaseName: string): string {
-        let nameIndex = 0;
-        let creepName: string;
-        do {
-            nameIndex++;
-            creepName = creepBaseName + nameIndex;
-        } while (!this.creepManager.canCreateCreepWithName(creepName));
-        return creepName;
+    public createBuilderInRoom(energyLevel: number, room: Room) {
+        const creepParts = BuilderParts[energyLevel];
+
+        const availableSpawns = this.getAvailableSpawnsInRoom(room, creepParts);
+        if (availableSpawns.length > 0) {
+            console.log("We need some more builders in room " + room.name);
+            const baseName = `${Roles.CREEP_BUILDER_ROLE}_Bernd_${room.name}_`;
+            const creepName = this.creepManager.getNextCreepName(baseName);
+            this.createCreep(
+                creepName,
+                creepParts,
+                { role: Roles.CREEP_BUILDER_ROLE, techLevel: energyLevel },
+                availableSpawns);
+        }
+    }
+
+    public getConstructionSitesInRoom(room: Room): ConstructionSite[] {
+        return _.filter(Game.constructionSites, (site) => site.room === room);
+    }
+
+    /**
+     * Returns a construction site for an extension of the room (first or default... may return null or undefined)
+     */
+    public getExtensionConstructionSiteOfRoom(room: Room): ConstructionSite {
+        const cs = this.getConstructionSitesInRoom(room);
+        return _.find(cs, (site) => site.structureType === STRUCTURE_EXTENSION);
+    }
+
+    // tslint:disable-next-line:max-line-length
+    // TODO: When we reach room controller level 7 we will get a problem: 2 Spawns are possible to be placed.
+    public updateRoomExtensions(room: Room) {
+
+        if (this.getExtensionConstructionSiteOfRoom(room)) {
+            // tslint:disable-next-line:max-line-length
+            // there is already a construction site for an extension. Let's just say we want to build one after another...
+            return;
+        }
+
+        const ctrl = room.controller;
+        if (ctrl.my) {
+            let maxExtensions = 0;
+            switch (ctrl.level) {
+                case 0:
+                case 1:
+                    break;
+                case 2:
+                    // 5 Extensions!
+                    maxExtensions = 5;
+                    break;
+                case 3:
+                    maxExtensions = 10;
+                    break;
+            }
+
+            if (!this.areExtensionsMaxedInRoom(room, maxExtensions)) {
+                console.log(maxExtensions);
+                this.createExtensionConstructionSiteInRoom(room);
+            }
+
+        } else {
+            console.log("Room extensions can not be updated: This is not my room: " + room.name);
+        }
     }
 
     private createCreep(
@@ -183,6 +198,87 @@ export class RoomManager implements IRoomManager {
         }
     }
 
+    private areExtensionsMaxedInRoom(room: Room, maxExtensions: number): boolean {
+        const extensions =
+            this.getStructuresInRoom(room, (structure) => structure.structureType === STRUCTURE_EXTENSION);
+        if (extensions.length < maxExtensions) {
+            return false;
+        }
+        return true;
+    }
+
+    private createExtensionConstructionSiteInRoom(room: Room): void {
+        console.log("Placing a new construction site in room '" + room.name + "'");
+
+        let x = 0;
+        let y = 0;
+        const spawns = this.getSpawnsInRoom(room);
+        if (spawns.length > 0) {
+            const sp = spawns[0].pos;
+            let direction: "right" | "top" | "left" | "bottom" = "right";
+
+            x = sp.x;
+            y = sp.y;
+            let step: number = 1;
+            let currentRepeats: number = 1;
+
+            do {
+                step--;
+                switch (direction) {
+                    case "left":
+                        x -= 3;
+                        break;
+                    case "right":
+                        x += 3;
+                        break;
+                    case "top":
+                        y -= 3;
+                        break;
+                    case "bottom":
+                        y += 3;
+                        break;
+                }
+
+                if (step === 0) {
+                    switch (direction) {
+                        case "left":
+                            direction = "bottom";
+                            break;
+                        case "right":
+                            direction = "top";
+                            break;
+                        case "top":
+                            direction = "left";
+                            currentRepeats += 1;
+                            break;
+                        case "bottom":
+                            direction = "right";
+                            currentRepeats += 1;
+                            break;
+                    }
+                    step = currentRepeats;
+                }
+
+                const stuffAt = room.lookAt(x, y);
+                if (
+                    _.find(stuffAt, (s) =>
+                        s.type === LOOK_TERRAIN &&
+                        s.terrain === "plain") &&
+
+                    !_.find(stuffAt, (s) => s.type === LOOK_CONSTRUCTION_SITES) &&
+
+                    !_.find(stuffAt, (s) => s.type === LOOK_CREEPS) &&
+
+                    !_.find(stuffAt, (s) =>
+                        s.type === LOOK_STRUCTURES &&
+                        s.structure.structureType !== STRUCTURE_ROAD)) {
+                    // we can create an extension here!
+                    room.createConstructionSite(x, y, STRUCTURE_EXTENSION);
+                    break;
+                }
+            } while (x < 50 && x < 50);
+        }
+    }
 }
 
 // tslint:disable-next-line:interface-name
@@ -194,18 +290,27 @@ interface CreepPartsMap {
  * Nur zum Resourcen sammeln!
  */
 const HarvesterParts: CreepPartsMap = {
-    0: [WORK, CARRY, MOVE, MOVE],
-    1: [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
-    2: [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
+    0: [WORK, CARRY, CARRY, MOVE, MOVE],
+    1: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    2: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
 };
 
 /**
  * Zum Updaten
  */
 const UpdaterParts: CreepPartsMap = {
-    0: [WORK, CARRY, MOVE, MOVE],
-    1: [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
-    2: [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
+    0: [WORK, CARRY, CARRY, MOVE, MOVE],
+    1: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    2: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+};
+
+/**
+ * Zum Bauen
+ */
+const BuilderParts: CreepPartsMap = {
+    0: [WORK, CARRY, CARRY, MOVE, MOVE],
+    1: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
+    2: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
 };
 
 export default RoomManager;

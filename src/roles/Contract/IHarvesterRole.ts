@@ -1,3 +1,3 @@
-export interface IHarversterRole {
+export interface IHarvesterRole {
     harvestEnergy(harvestingCreeps: Creep[]): void;
 }

@@ -1,6 +1,7 @@
 import { inject, injectable } from "inversify";
 import { Roles } from "../constants/roles";
 
+import { CreepMemory } from "../memory/CreepMemory";
 import { ICreepManager } from "./Contract/ICreepManager";
 import { MyCreeps } from "./Contract/MyCreeps";
 
@@ -14,9 +15,16 @@ export class CreepManager implements ICreepManager {
         return [];
     }
 
-    public getUpgrader(creeps: Creep[]): Creep[] {
+    public getUpgraders(creeps: Creep[]): Creep[] {
         if (creeps) {
             return _.filter(creeps, (creep) => (creep.memory as CreepMemory).role === Roles.CREEP_UPGRADER_ROLE);
+        }
+        return [];
+    }
+
+    public getBuilders(creeps: Creep[]): Creep[] {
+        if (creeps) {
+            return _.filter(creeps, (creep) => (creep.memory as CreepMemory).role === Roles.CREEP_BUILDER_ROLE);
         }
         return [];
     }
@@ -80,10 +88,20 @@ export class CreepManager implements ICreepManager {
         return spawn.canCreateCreep(creepParts) === 0;
     }
 
-    public getCosts(creepParts: string[]): number {
+    public getCreepCosts(creepParts: string[]): number {
         return creepParts.reduce(
             (previousResult, currentValue, currentIndex, partsArray) =>
                 previousResult += BODYPART_COST[currentValue],
             0);
+    }
+
+    public getNextCreepName(creepBaseName: string): string {
+        let nameIndex = 0;
+        let creepName: string;
+        do {
+            nameIndex++;
+            creepName = creepBaseName + nameIndex;
+        } while (!this.canCreateCreepWithName(creepName));
+        return creepName;
     }
 }

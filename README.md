@@ -1,11 +1,11 @@
-# BlankExpressSketch
-Ein p5js sketch, welcher als Grundlage für Sketches dienen soll, welche über einen Webservice angesteuert werden müssen.
-Beispielsweise das Laden von Dateien ist nur mittels eines solchen Aufbaus möglich, 
-da ansonsten aufgrund von CORS bzw. SOP ein Laden von Dateien durch Javascript verhindert wird.
+# Some screeps experiments :)
 
-Siehe dazu auch: 
-https://de.wikipedia.org/wiki/Cross-Origin_Resource_Sharing
+# Workaround for uploading main.js:
+There is an issue uploading the correct file extension to screeps in version 1.3.0... therefore we changed the screeps webpack plugin version from:
 
-und 
+"screeps-webpack-plugin": "^1.3.0",
+to
+"screeps-webpack-plugin": "git://github.com/langri-sha/screeps-webpack-plugin.git"
 
-https://de.wikipedia.org/wiki/Same-Origin-Policy
+inside the package.json
+// workaround from: https://github.com/screepers/screeps-typescript-starter/issues/62

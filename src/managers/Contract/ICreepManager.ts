@@ -1,3 +1,4 @@
+import { CreepMemory } from "../../memory/CreepMemory";
 import { MyCreeps } from "./MyCreeps";
 
 export interface ICreepManager {
@@ -6,8 +7,20 @@ export interface ICreepManager {
 
     getCreepsForRoom(room: Room): Creep[];
 
+    /**
+     * returns all harvesting creeps from passed creeps array
+     */
     getHarvesters(creeps: Creep[]): Creep[];
-    getUpgrader(creeps: Creep[]): Creep[];
+
+    /**
+     * returns all upgrader creeps from passed creeps array
+     */
+    getUpgraders(creeps: Creep[]): Creep[];
+
+    /**
+     * returns all builder creeps from passed creeps array
+     */
+    getBuilders(creeps: Creep[]): Creep[];
 
     canCreateCreepWithName(creepName: string): boolean;
     canCreateCreepAtSpawn(spawn: StructureSpawn, creepParts: string[]): boolean;
@@ -20,5 +33,7 @@ export interface ICreepManager {
     /**
      * returns the cost of a creep with corresponding creep parts.
      */
-    getCosts(creepParts: string[]): number;
+    getCreepCosts(creepParts: string[]): number;
+
+    getNextCreepName(creepBaseName: string): string;
 }

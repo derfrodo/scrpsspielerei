@@ -11,9 +11,9 @@ module.exports = {
     devtool: "source-map",
     entry: require("./webpack.dev.entry"),
     output: {
-        filename: "[name]",
+        filename: "[name].js",
         path: path.resolve(__dirname, "../dist"),
-        // sourceMapFilename: "[file].map.js", // normally this is [file].map, 
+        sourceMapFilename: "[file].map.js", // normally this is [file].map, 
         // but we need a js file, or it will be rejected by screeps server.
         devtoolModuleFilenameTemplate: "[resource-path]",
         pathinfo: false,
