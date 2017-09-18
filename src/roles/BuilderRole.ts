@@ -83,8 +83,7 @@ export class BuilderRole implements IBuilderRole {
 
                     const closest = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                         filter: (struct: Structure & { my: boolean }) => {
-                            return (struct.my || struct.structureType === STRUCTURE_ROAD) &&
-                                struct.hits < struct.hitsMax;
+                            return struct.hits < struct.hitsMax;
                         },
                     }) as Structure;
 
