@@ -58,25 +58,32 @@ export class HarversterRole implements IHarvesterRole {
     }
 
     private bringBackEnergy(creep: Creep) {
-        const availableSpawns: Spawn[] =
-            _.filter(creep.room.find(FIND_MY_SPAWNS) as Spawn[], (s) => s.energy < s.energyCapacity) as Spawn[];
 
-        if (availableSpawns.length > 0) {
-            if (creep.transfer(availableSpawns[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(availableSpawns[0].pos, HarvesterCreepMoveOptions);
+        const closeExtension = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter:
+            (struct: Structure) => {
+                return struct.structureType === STRUCTURE_EXTENSION &&
+                    (struct as StructureExtension).energy < (struct as StructureExtension).energyCapacity;
+            },
+        }) as StructureExtension;
+
+        if (closeExtension) {
+            if (creep.transfer(closeExtension, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(closeExtension.pos, HarvesterCreepMoveOptions);
             }
             return;
         }
 
-        const availableExtensions: Extension[] =
-            _.filter(creep.room.find(FIND_STRUCTURES) as Structure[],
-                (s) => s.structureType === STRUCTURE_EXTENSION &&
-                    (s as StructureExtension).energy <
-                    (s as StructureExtension).energyCapacity) as StructureExtension[];
+        const closeSpawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
+            filter:
+            (spawn: StructureSpawn) => {
+                return (spawn as StructureSpawn).energy < (spawn as StructureSpawn).energyCapacity;
+            },
+        }) as StructureExtension;
 
-        if (availableExtensions.length > 0) {
-            if (creep.transfer(availableExtensions[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(availableExtensions[0].pos, HarvesterCreepMoveOptions);
+        if (closeSpawn) {
+            if (creep.transfer(closeSpawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(closeSpawn.pos, HarvesterCreepMoveOptions);
             }
             return;
         }
@@ -98,7 +105,9 @@ export class HarversterRole implements IHarvesterRole {
             }
         } else {
             const closestSpawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS) as Spawn;
-            creep.moveTo(closestSpawn.pos, HarvesterCreepMoveOptions);
+            if (closestSpawn) {
+                creep.moveTo(closestSpawn.pos, HarvesterCreepMoveOptions);
+            }
         }
     }
 

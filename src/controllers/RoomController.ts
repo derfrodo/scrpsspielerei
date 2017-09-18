@@ -120,7 +120,8 @@ export class RoomController implements IRoomController {
                 // otherwise a spawn may be available but not used during at least one tick
             } else {
                 // all needed creeps have been created. Maybe we want to replace a creep?
-                if (energyLevel > 0) {
+                if (energyLevel > 0 &&
+                    room.energyAvailable === room.energyCapacityAvailable) {
                     let lowLevelCreep =
                         _.find(harvesters, (creep) =>
                             (creep.memory as CreepMemory).techLevel < energyLevel);

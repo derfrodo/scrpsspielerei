@@ -151,22 +151,34 @@ export class RoadController implements IRoadController {
             unfinishedPositions: [],
         };
 
-        const roomsConstructuinSites = this.roomManager.getConstructionSitesInRoom(room) as RoomObject[];
-        const roads =
-            this.roomManager.getStructuresInRoom(room, (s) => s.structureType === STRUCTURE_ROAD) as RoomObject[];
-
         const callback = (roomName: string, costMatrix: CostMatrix) => {
             const clone = costMatrix.clone();
-            for (const cs of roomsConstructuinSites) {
-                clone.set(cs.pos.x, cs.pos.y, 254);
+            const css = Game.rooms[roomName].find(FIND_CONSTRUCTION_SITES) as ConstructionSite[];
+            for (const cs of css) {
+                clone.set(cs.pos.x, cs.pos.y, 20);
+                // console.log(cs.pos.x + " " + cs.pos.y);
             }
-            for (const rd of roads) {
-                clone.set(rd.pos.x, rd.pos.y, 254);
+
+            const rds = Game.rooms[roomName].find(FIND_STRUCTURES, {
+                filter: (str: Structure) => str.structureType === STRUCTURE_ROAD,
+            }) as Structure[];
+            for (const rd of rds) {
+                clone.set(rd.pos.x, rd.pos.y, 20);
+                // console.log(rd.pos.x + " " + rd.pos.y);
             }
+
+            // for (let i = 0; i < 50; i++) {
+            //     let row: string = "";
+            //     for (let j = 0; j < 50; j++) {
+            //         row += clone.get(j, i) + " ";
+            //     }
+            //     console.log(row);
+            // }
+
             return clone;
         };
 
-        const path = pos1.findPathTo(pos2, { ignoreRoads: true, costCallback: callback });
+        const path = pos1.findPathTo(pos2, { ignoreCreeps: true, ignoreRoads: true, costCallback: callback });
 
         for (const stepIndex in path) {
             const step = path[stepIndex];

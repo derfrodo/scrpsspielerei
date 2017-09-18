@@ -94,7 +94,9 @@ export class BuilderRole implements IBuilderRole {
                         }
                     } else {
                         const closestSpawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS) as Spawn;
-                        creep.moveTo(closestSpawn.pos, RoadBuilderMoveToOps);
+                        if (closestSpawn) {
+                            creep.moveTo(closestSpawn.pos, RoadBuilderMoveToOps);
+                        }
                     }
                 }
                 break;
