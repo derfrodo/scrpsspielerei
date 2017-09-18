@@ -8,9 +8,9 @@ export class CreepSettings {
     /**
      * How many upgraders shall be created inside a single room?
      */
-    public upgradersPerRoom = 2;
+    public upgradersPerRoom = 4;
 
-    public buildersPerRoom = 2;
+    public buildersPerRoom = 4;
 }
 
 export const DefaultCreepSettings = new CreepSettings();

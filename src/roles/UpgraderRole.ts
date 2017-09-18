@@ -22,10 +22,7 @@ export class UpgraderRole implements IUpgraderRole {
             const creep = upgraderCreeps[creepIndex];
             if (creep.memory.upgrading === false) {
                 if (creep.carry.energy < creep.carryCapacity) {
-                    const sources: Source = creep.pos.findClosestByPath(FIND_SOURCES) as Source;
-                    if (creep.harvest(sources) === ERR_NOT_IN_RANGE) {
-                        creep.moveTo(sources, UpgraderMoveToOptions);
-                    }
+                    this.creepManager.harvestFromClosestSource(creep, UpgraderMoveToOptions);
                 } else {
                     creep.memory.upgrading = true;
                 }

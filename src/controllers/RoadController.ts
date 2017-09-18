@@ -65,7 +65,7 @@ export class RoadController implements IRoadController {
         if (!roads.activeRoad || roads.activeRoad.finished) {
             // Plan the next road!
             // Well we need to select a star point, don't we?
-            console.log("We need a new road in room " + room.name);
+            // console.log("We need a new road in room " + room.name);
 
             let selectedRoad: {
                 start?: { pos: RoomPosition; id: string; },
@@ -88,7 +88,9 @@ export class RoadController implements IRoadController {
                 for (const j in spawns) {
                     const spawn = spawns[j];
                     const info = infos[spawn.id];
-                    if (!selectedRoad || selectedRoad.count > (info || 0)) {
+                    if ((info || 0) > this.roomSettings.maximumRoadsBetweenStructure) {
+                        continue;
+                    } else if (!selectedRoad || selectedRoad.count > (info || 0)) {
                         selectedRoad = {
                             count: info || 0,
                             destination: spawn,
@@ -107,7 +109,9 @@ export class RoadController implements IRoadController {
                 for (const j in extensions) {
                     const extension = extensions[j];
                     const info = infos[extension.id];
-                    if (!selectedRoad || selectedRoad.count > (info || 0)) {
+                    if ((info || 0) > this.roomSettings.maximumRoadsBetweenStructure) {
+                        continue;
+                    } else if (!selectedRoad || selectedRoad.count > (info || 0)) {
                         selectedRoad = {
                             count: info || 0,
                             destination: extension,
@@ -119,7 +123,9 @@ export class RoadController implements IRoadController {
                 // Controller
                 {
                     const info = infos[room.controller.id];
-                    if (!selectedRoad || selectedRoad.count > (info || 0)) {
+                    if ((info || 0) > this.roomSettings.maximumRoadsBetweenStructure) {
+                        // controller has already enough roads.
+                    } else if (!selectedRoad || selectedRoad.count > (info || 0)) {
                         selectedRoad = {
                             count: info || 0,
                             destination: room.controller,
@@ -129,10 +135,12 @@ export class RoadController implements IRoadController {
                 }
             }
 
-            console.log("Creating construction sites for new road in room " + room.name);
-            const nextRoad = this.buildRoad(room, selectedRoad.start.pos, selectedRoad.destination.pos);
-            roads.activeRoad = nextRoad;
-            roads.roadsInfos[selectedRoad.start.id][selectedRoad.destination.id] = selectedRoad.count + 1;
+            if (selectedRoad) {
+                console.log("Creating construction sites for new road in room " + room.name);
+                const nextRoad = this.buildRoad(room, selectedRoad.start.pos, selectedRoad.destination.pos);
+                roads.activeRoad = nextRoad;
+                roads.roadsInfos[selectedRoad.start.id][selectedRoad.destination.id] = selectedRoad.count + 1;
+            }
         }
     }
 

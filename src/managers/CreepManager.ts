@@ -104,4 +104,11 @@ export class CreepManager implements ICreepManager {
         } while (!this.canCreateCreepWithName(creepName));
         return creepName;
     }
+
+    public harvestFromClosestSource(creep: Creep, moveOptions?: MoveToOpts) {
+        const source: Source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE) as Source;
+        if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
+            creep.moveTo(source.pos, moveOptions);
+        }
+    }
 }

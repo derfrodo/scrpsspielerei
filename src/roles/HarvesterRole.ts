@@ -46,11 +46,7 @@ export class HarversterRole implements IHarvesterRole {
                     creep.say("I have to go now.");
                     creep.suicide();
                 }
-
-                const source: Source = creep.pos.findClosestByPath(FIND_SOURCES) as Source;
-                if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source.pos, HarvesterCreepMoveOptions);
-                }
+                this.creepManager.harvestFromClosestSource(creep, HarvesterCreepMoveOptions);
                 break;
             case "BringBack":
                 this.bringBackEnergy(creep);

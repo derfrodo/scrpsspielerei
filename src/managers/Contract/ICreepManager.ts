@@ -36,4 +36,6 @@ export interface ICreepManager {
     getCreepCosts(creepParts: string[]): number;
 
     getNextCreepName(creepBaseName: string): string;
+
+    harvestFromClosestSource(creep: Creep, moveOptions?: MoveToOpts);
 }

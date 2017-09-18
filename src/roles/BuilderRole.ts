@@ -14,11 +14,14 @@ import { IBuilderRole } from "./Contract/IBuilderRole";
 export class BuilderRole implements IBuilderRole {
 
     private roomManager: IRoomManager;
+    private creepManager: ICreepManager;
 
     constructor(
         @inject(TYPES.RoomManager) roomManager: IRoomManager,
+        @inject(TYPES.CreepManager) creepManager: ICreepManager,
     ) {
         this.roomManager = roomManager;
+        this.creepManager = creepManager;
     }
 
     public updateBuildingTasks(buildingCreeps: Creep[]): void {
@@ -58,10 +61,7 @@ export class BuilderRole implements IBuilderRole {
 
         switch (bm.status) {
             case "Harvesting":
-                const source: Source = creep.pos.findClosestByPath(FIND_SOURCES) as Source;
-                if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source.pos, RoadBuilderMoveToOps);
-                }
+                this.creepManager.harvestFromClosestSource(creep, RoadBuilderMoveToOps);
                 break;
             case "Building":
                 const ecs = this.roomManager.getExtensionConstructionSiteOfRoom(creep.room);
@@ -79,8 +79,23 @@ export class BuilderRole implements IBuilderRole {
                         creep.moveTo(cs.pos, RoadBuilderMoveToOps);
                     }
                 } else {
-                    const closestSpawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS) as Spawn;
-                    creep.moveTo(closestSpawn.pos, RoadBuilderMoveToOps);
+                    // search for near structures to be repaired.
+
+                    const closest = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                        filter: (struct: Structure & { my: boolean }) => {
+                            return (struct.my || struct.structureType === STRUCTURE_ROAD) &&
+                                struct.hits < struct.hitsMax;
+                        },
+                    }) as Structure;
+
+                    if (closest) {
+                        if (creep.repair(closest) === ERR_NOT_IN_RANGE) {
+                            creep.moveTo(closest.pos, RoadBuilderMoveToOps);
+                        }
+                    } else {
+                        const closestSpawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS) as Spawn;
+                        creep.moveTo(closestSpawn.pos, RoadBuilderMoveToOps);
+                    }
                 }
                 break;
         }
