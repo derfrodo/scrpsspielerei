@@ -88,7 +88,7 @@ export class RoadController implements IRoadController {
                 for (const j in spawns) {
                     const spawn = spawns[j];
                     const info = infos[spawn.id];
-                    if ((info || 0) > this.roomSettings.maximumRoadsBetweenStructure) {
+                    if ((info || 0) >= this.roomSettings.maximumRoadsBetweenStructure) {
                         continue;
                     } else if (!selectedRoad || selectedRoad.count > (info || 0)) {
                         selectedRoad = {
@@ -109,7 +109,7 @@ export class RoadController implements IRoadController {
                 for (const j in extensions) {
                     const extension = extensions[j];
                     const info = infos[extension.id];
-                    if ((info || 0) > this.roomSettings.maximumRoadsBetweenStructure) {
+                    if ((info || 0) >= this.roomSettings.maximumRoadsBetweenStructure) {
                         continue;
                     } else if (!selectedRoad || selectedRoad.count > (info || 0)) {
                         selectedRoad = {
@@ -123,7 +123,7 @@ export class RoadController implements IRoadController {
                 // Controller
                 {
                     const info = infos[room.controller.id];
-                    if ((info || 0) > this.roomSettings.maximumRoadsBetweenStructure) {
+                    if ((info || 0) >= this.roomSettings.maximumRoadsBetweenStructure) {
                         // controller has already enough roads.
                     } else if (!selectedRoad || selectedRoad.count > (info || 0)) {
                         selectedRoad = {
@@ -155,7 +155,7 @@ export class RoadController implements IRoadController {
             const clone = costMatrix.clone();
             const css = Game.rooms[roomName].find(FIND_CONSTRUCTION_SITES) as ConstructionSite[];
             for (const cs of css) {
-                clone.set(cs.pos.x, cs.pos.y, 20);
+                clone.set(cs.pos.x, cs.pos.y, 6);
                 // console.log(cs.pos.x + " " + cs.pos.y);
             }
 
@@ -163,7 +163,7 @@ export class RoadController implements IRoadController {
                 filter: (str: Structure) => str.structureType === STRUCTURE_ROAD,
             }) as Structure[];
             for (const rd of rds) {
-                clone.set(rd.pos.x, rd.pos.y, 20);
+                clone.set(rd.pos.x, rd.pos.y, 6);
                 // console.log(rd.pos.x + " " + rd.pos.y);
             }
 
