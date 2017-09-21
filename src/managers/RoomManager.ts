@@ -46,8 +46,13 @@ export class RoomManager implements IRoomManager {
             return 2;
         }
 
-        if (room.energyCapacityAvailable >= 800) {
+        if (room.energyCapacityAvailable >= 800 &&
+            room.energyCapacityAvailable < 1300) {
             return 3;
+        }
+
+        if (room.energyCapacityAvailable >= 1300) {
+            return 4;
         }
         // no energy? Is it even my room?
         return -1;
@@ -174,6 +179,9 @@ export class RoomManager implements IRoomManager {
                 case 3:
                     maxExtensions = 10;
                     break;
+                case 4:
+                    maxExtensions = 20;
+                    break;
             }
 
             if (!this.areExtensionsMaxedInRoom(room, maxExtensions)) {
@@ -269,25 +277,27 @@ export class RoomManager implements IRoomManager {
                     }
                     step = currentRepeats;
                 }
+                if (x > 0 && x < 50 && y > 0 && y < 50) {
+                    const stuffAt = room.lookAt(x, y);
+                    if (
+                        _.find(stuffAt, (s) =>
+                            s.type === LOOK_TERRAIN &&
+                            s.terrain === "plain" ||
+                            s.terrain === "swamp") &&
 
-                const stuffAt = room.lookAt(x, y);
-                if (
-                    _.find(stuffAt, (s) =>
-                        s.type === LOOK_TERRAIN &&
-                        s.terrain === "plain") &&
+                        !_.find(stuffAt, (s) => s.type === LOOK_CONSTRUCTION_SITES) &&
 
-                    !_.find(stuffAt, (s) => s.type === LOOK_CONSTRUCTION_SITES) &&
+                        !_.find(stuffAt, (s) => s.type === LOOK_CREEPS) &&
 
-                    !_.find(stuffAt, (s) => s.type === LOOK_CREEPS) &&
-
-                    !_.find(stuffAt, (s) =>
-                        s.type === LOOK_STRUCTURES &&
-                        s.structure.structureType !== STRUCTURE_ROAD)) {
-                    // we can create an extension here!
-                    room.createConstructionSite(x, y, STRUCTURE_EXTENSION);
-                    break;
+                        !_.find(stuffAt, (s) =>
+                            s.type === LOOK_STRUCTURES &&
+                            s.structure.structureType !== STRUCTURE_ROAD)) {
+                        // we can create an extension here!
+                        room.createConstructionSite(x, y, STRUCTURE_EXTENSION);
+                        break;
+                    }
                 }
-            } while (x < 50 && x < 50);
+            } while (x > 0 && x < 50 || y > 0 && y < 50);
         }
     }
 }
@@ -305,6 +315,9 @@ const HarvesterParts: CreepPartsMap = {
     1: [WORK, WORK, CARRY, CARRY, MOVE, MOVE],
     2: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
     3: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
+    4: [WORK, WORK, WORK, WORK, WORK, WORK,
+        CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+        MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
 };
 
 /**
@@ -315,6 +328,9 @@ const UpdaterParts: CreepPartsMap = {
     1: [WORK, WORK, CARRY, CARRY, MOVE, MOVE],
     2: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
     3: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
+    4: [WORK, WORK, WORK, WORK, WORK, WORK,
+        CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+        MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
 };
 
 /**
@@ -325,6 +341,9 @@ const BuilderParts: CreepPartsMap = {
     1: [WORK, WORK, CARRY, CARRY, MOVE, MOVE],
     2: [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
     3: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
+    4: [WORK, WORK, WORK, WORK, WORK, WORK,
+        CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+        MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
 };
 
 export default RoomManager;
