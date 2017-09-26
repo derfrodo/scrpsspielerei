@@ -9,6 +9,8 @@ export interface CreepMemory {
      */
     role: string;
 
+    roomName: string;
+
     /**
      * Tech level of creep
      */

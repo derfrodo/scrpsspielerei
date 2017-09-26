@@ -61,7 +61,7 @@ export class CreepManager implements ICreepManager {
     public getCreepsForRoom(room: Room): Creep[] {
         return _.filter(Game.creeps,
             (creep) =>
-                creep.room === room);
+                (creep.memory as CreepMemory).roomName === room.name);
     }
 
     public createCreep(

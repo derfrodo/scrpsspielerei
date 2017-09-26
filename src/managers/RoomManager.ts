@@ -106,7 +106,7 @@ export class RoomManager implements IRoomManager {
             this.createCreep(
                 creepName,
                 creepParts,
-                { role: Roles.CREEP_HARVERSTER_ROLE, techLevel: energyLevel },
+                { role: Roles.CREEP_HARVERSTER_ROLE, techLevel: energyLevel, roomName: room.name },
                 availableSpawns);
         }
     }
@@ -122,7 +122,7 @@ export class RoomManager implements IRoomManager {
             this.createCreep(
                 creepName,
                 creepParts,
-                { role: Roles.CREEP_UPGRADER_ROLE, techLevel: energyLevel },
+                { role: Roles.CREEP_UPGRADER_ROLE, techLevel: energyLevel, roomName: room.name },
                 availableSpawns);
         }
     }
@@ -138,7 +138,7 @@ export class RoomManager implements IRoomManager {
             this.createCreep(
                 creepName,
                 creepParts,
-                { role: Roles.CREEP_BUILDER_ROLE, techLevel: energyLevel },
+                { role: Roles.CREEP_BUILDER_ROLE, techLevel: energyLevel, roomName: room.name },
                 availableSpawns);
         }
     }
@@ -194,10 +194,10 @@ export class RoomManager implements IRoomManager {
         }
     }
 
-    private createCreep(
+    private createCreep<K extends keyof CreepMemory>(
         creepName: string,
         creepParts: string[],
-        creepMemory: Pick<CreepMemory, keyof CreepMemory>,
+        creepMemory: Pick<CreepMemory, K>,
         availableSpawns: StructureSpawn[]): void {
 
         for (const spawn of availableSpawns) {
